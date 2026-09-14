@@ -40,94 +40,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
   -->
+  <link rel="stylesheet" href="theme.css">
   <style>
-    /* Theme presets and accent variables. */
-
-    /* Default Light palette, overridden by the theme manager. */
-    :root, :root[data-preset="light"] {
-      color-scheme: light;
-      --bg:            #f5f3f0;
-      --surface:       #ffffff;
-      --surface-2:     #eae7e3;
-      --panel:         #f0ede9;
-      --line:          rgba(26,26,26,0.12);
-      --line-strong:   rgba(26,26,26,0.24);
-      --ink:           #1a1a1a;
-      --ink-2:         #6b6b6b;
-      --mute:          #a0a0a0;
-      --accent:        #4a6fa5;
-      --accent-bright: #6088bf;
-      --accent-dim:    #3d5f8f;
-      --accent-fg:     #ffffff;
-      --accent-soft:   rgba(74,111,165,0.10);
-      --ok:            #3a8a5c;
-      --ok-soft:       rgba(58,138,92,0.10);
-      --warn:          #9e7a30;
-      --warn-soft:     rgba(158,122,48,0.10);
-      --alert:         #a5566a;
-      --alert-soft:    rgba(165,86,106,0.10);
-      --run:           #3a8ab5;
-      --run-soft:      rgba(58,138,181,0.10);
-      --shadow-1:      0 1px 2px rgba(0,0,0,0.04);
-      --shadow-modal:  0 20px 50px rgba(0,0,0,0.18);
-    }
-
-    :root[data-preset="honey"] {
-      color-scheme: dark;
-      --bg:            #0a0a0a;
-      --surface:       #141414;
-      --surface-2:     #1a1a1a;
-      --panel:         #111111;
-      --line:          rgba(245,240,235,0.10);
-      --line-strong:   rgba(245,240,235,0.20);
-      --ink:           #f5f0eb;
-      --ink-2:         #a39787;
-      --mute:          #6b5f53;
-      --accent:        #d4a574;
-      --accent-bright: #e8c49a;
-      --accent-dim:    #c9a96e;
-      --accent-fg:     #0a0a0a;
-      --accent-soft:   rgba(212,165,116,0.16);
-      --ok:            #5a9e6f;
-      --ok-soft:       rgba(90,158,111,0.18);
-      --warn:          #c9963a;
-      --warn-soft:     rgba(201,150,58,0.18);
-      --alert:         #cf7a8a;
-      --alert-soft:    rgba(207,122,138,0.18);
-      --run:           #5ba4cf;
-      --run-soft:      rgba(91,164,207,0.16);
-      --shadow-1:      0 1px 3px rgba(0,0,0,0.4);
-      --shadow-modal:  0 20px 50px rgba(0,0,0,0.55);
-    }
-
-    :root[data-preset="ocean"] {
-      color-scheme: dark;
-      --bg:            #0a0e14;
-      --surface:       #141c24;
-      --surface-2:     #1a222c;
-      --panel:         #111820;
-      --line:          rgba(232,237,242,0.10);
-      --line-strong:   rgba(232,237,242,0.20);
-      --ink:           #e8edf2;
-      --ink-2:         #87939f;
-      --mute:          #536b7a;
-      --accent:        #5ba4cf;
-      --accent-bright: #7abce0;
-      --accent-dim:    #4e93ba;
-      --accent-fg:     #0a0e14;
-      --accent-soft:   rgba(91,164,207,0.16);
-      --ok:            #5a9e6f;
-      --ok-soft:       rgba(90,158,111,0.18);
-      --warn:          #c9963a;
-      --warn-soft:     rgba(201,150,58,0.18);
-      --alert:         #cf7a8a;
-      --alert-soft:    rgba(207,122,138,0.18);
-      --run:           #5ba4cf;
-      --run-soft:      rgba(91,164,207,0.16);
-      --shadow-1:      0 1px 3px rgba(0,0,0,0.4);
-      --shadow-modal:  0 20px 50px rgba(0,0,0,0.55);
-    }
-
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; min-height: 100%; }
     body {
@@ -1569,25 +1483,26 @@ SOFTWARE.
       </form>
     </div>
   </div>
-  <script src="app.js" type="module"></script>
   <script>
-    // Apply the theme before app.js paints to prevent a color flash.
+    // Minimal, synchronous, dependency-free: set data-preset before first
+    // paint to avoid a flash of the default (light) theme. This must stay a
+    // classic (non-module) script, since module scripts are deferred and
+    // could paint before this runs. Colors, the picker UI, and the
+    // theme-color meta tag are not paint-critical and are handled by the
+    // deferred theme module below, which imports the shared preset data.
     (function () {
-      const PRESETS = [
-        { id: 'light', name: 'Light', bg: '#f5f3f0', accent: '#4a6fa5' },
-        { id: 'honey', name: 'Honey', bg: '#0a0a0a', accent: '#d4a574' },
-        { id: 'ocean', name: 'Ocean', bg: '#0a0e14', accent: '#5ba4cf' },
-      ];
-      const PRESET_KEY = 'sealog.preset';
+      try {
+        var id = localStorage.getItem('sealog.preset');
+        if (!id) id = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ocean' : 'light';
+        document.documentElement.dataset.preset = id;
+      } catch (e) { /* ignore */ }
+    })();
+  </script>
+  <script src="app.js" type="module"></script>
+  <script type="module">
+    import { PRESETS, PRESET_KEY, getPreset, storedPresetId, systemPreferredPresetId } from './src/theme/presets.js';
 
-      function getPreset(id) { return PRESETS.find(p => p.id === id) || PRESETS[0]; }
-      function storedPresetId() {
-        try {
-          const id = localStorage.getItem(PRESET_KEY);
-          return PRESETS.some(p => p.id === id) ? id : null;
-        } catch (e) { return null; }
-      }
-
+    (function () {
       function applyTheme(presetId, opts = {}) {
         const preset = getPreset(presetId);
         const apply = () => {
@@ -1638,12 +1553,6 @@ SOFTWARE.
           applyTheme(presetId);
         }
       });
-
-      // Resolve the OS-preferred preset when the user hasn't chosen one yet.
-      // System dark → ocean, system light → light.
-      function systemPreferredPresetId() {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ocean' : 'light';
-      }
 
       // Boot — apply user-locked preset if present, otherwise honor OS theme.
       function boot() {

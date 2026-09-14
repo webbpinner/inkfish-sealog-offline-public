@@ -21,6 +21,7 @@ services:
       - ./app.js:/srv/sealog-offline/app.js:ro
       - ./update-banner.js:/srv/sealog-offline/update-banner.js:ro
       - ./sw.js:/srv/sealog-offline/sw.js:ro
+      - ./theme.css:/srv/sealog-offline/theme.css:ro
       - ./manifest.webmanifest:/srv/sealog-offline/manifest.webmanifest:ro
       - ./favicon.ico:/srv/sealog-offline/favicon.ico:ro
       - ./src:/srv/sealog-offline/src:ro

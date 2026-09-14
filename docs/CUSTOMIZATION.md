@@ -204,7 +204,7 @@ use the saved bearer token, so both destinations must be trusted.
 | Browser title and main heading | `index.html`: `<title>`, visible `<h1>`, and `apple-mobile-web-app-title` |
 | Installed-app label and description | `manifest.webmanifest`: `name`, `short_name`, `description` |
 | Landing title and vessel cards | `landing.html`: `<title>`, heading, card labels and links |
-| Light/Honey/Ocean colors | CSS preset variables in `index.html` and `landing.html`; keep `index.html`'s `PRESETS`, `landing.html`'s `PRESET_BG`, and HTML/manifest theme colors consistent |
+| Light/Honey/Ocean colors | CSS preset variables in `theme.css` (shared by `index.html` and `landing.html`) and preset names/ids/meta-colors in `src/theme/presets.js` (the single source both pages import) |
 | Generated app icon colors | SVG wrapper in `scripts/sync-app-icons.mjs`: currently white glyph on teal `#0f766e` |
 | Browser and installed icons | Generated files under `icons/` and root `favicon.ico`; links in `index.html`, `landing.html`, `manifest.webmanifest`, and `sw.js` |
 

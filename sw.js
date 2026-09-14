@@ -18,6 +18,8 @@ const BASE_APP_SHELL = [
   '/app.js',
   '/update-banner.js',
   '/sw.js',
+  '/theme.css',
+  '/src/theme/presets.js',
   '/src/sw/helpers.js',
   '/src/config/constants.js',
   '/src/utils/time.js',
