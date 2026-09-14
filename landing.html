@@ -33,28 +33,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
   -->
+  <link rel="stylesheet" href="theme.css">
   <style>
-    :root, :root[data-preset="light"] {
-      color-scheme: light;
-      --bg:#f5f3f0; --surface:#ffffff; --surface-2:#eae7e3;
-      --line:rgba(26,26,26,0.12); --line-strong:rgba(26,26,26,0.24);
-      --ink:#1a1a1a; --ink-2:#6b6b6b; --mute:#a0a0a0;
-      --accent:#4a6fa5; --accent-fg:#ffffff; --accent-soft:rgba(74,111,165,0.10);
-    }
-    :root[data-preset="honey"] {
-      color-scheme: dark;
-      --bg:#0a0a0a; --surface:#141414; --surface-2:#1a1a1a;
-      --line:rgba(245,240,235,0.10); --line-strong:rgba(245,240,235,0.20);
-      --ink:#f5f0eb; --ink-2:#a39787; --mute:#6b5f53;
-      --accent:#d4a574; --accent-fg:#0a0a0a; --accent-soft:rgba(212,165,116,0.16);
-    }
-    :root[data-preset="ocean"] {
-      color-scheme: dark;
-      --bg:#0a0e14; --surface:#141c24; --surface-2:#1a222c;
-      --line:rgba(232,237,242,0.10); --line-strong:rgba(232,237,242,0.20);
-      --ink:#e8edf2; --ink-2:#87939f; --mute:#536b7a;
-      --accent:#5ba4cf; --accent-fg:#0a0e14; --accent-soft:rgba(91,164,207,0.16);
-    }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; padding: 0; min-height: 100%; }
     body {
@@ -137,23 +117,30 @@ SOFTWARE.
   </main>
   <footer>Sealog Offline &mdash; Offline-first event logging</footer>
   <script>
-    // Match the app’s stored preset and its fixed palette.
-    // Use Light when no preference is stored.
+    // Minimal, synchronous, dependency-free: set data-preset before first
+    // paint to avoid a flash of the default (light) theme, matching the
+    // app's stored preset. Use Light when no preference is stored — this
+    // page does not fall back to the OS preference the way the app does.
+    // The theme-color meta tag is not paint-critical and is handled by the
+    // deferred module below, which imports the shared preset data.
     (function () {
-      const PRESET_BG = {
-        'light': '#f5f3f0',
-        'honey': '#0a0a0a',
-        'ocean': '#0a0e14'
-      };
       try {
-        const p = localStorage.getItem('sealog.preset');
-        if (p && PRESET_BG[p]) {
-          document.documentElement.dataset.preset = p;
-          const meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) meta.setAttribute('content', PRESET_BG[p]);
-        }
-      } catch (e) {}
+        var id = localStorage.getItem('sealog.preset');
+        if (id) document.documentElement.dataset.preset = id;
+      } catch (e) { /* ignore */ }
     })();
+  </script>
+  <script type="module">
+    import { getPreset, storedPresetId } from './src/theme/presets.js';
+    try {
+      const id = storedPresetId();
+      if (id) {
+        const preset = getPreset(id);
+        document.documentElement.dataset.preset = preset.id;
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', preset.bg);
+      }
+    } catch (e) { /* ignore */ }
   </script>
 </body>
 </html>

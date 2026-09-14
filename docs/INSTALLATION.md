@@ -136,8 +136,9 @@ From the workstation, follow [Manual updates](MANUAL_UPDATE.md) through
 also handles a first installation and creates `/srv/sealog-offline`.
 
 The required runtime files are `index.html`, `landing.html`, `app.js`,
-`update-banner.js`, `sw.js`, `manifest.webmanifest`, `favicon.ico`, the complete
-`src/` and `icons/` directories, and the license files listed in that guide.
+`update-banner.js`, `sw.js`, `theme.css`, `manifest.webmanifest`, `favicon.ico`,
+the complete `src/` and `icons/` directories, and the license files listed in
+that guide.
 Do not point nginx at the source checkout or copy the entire repository into the
 web root. Tests, development dependencies, Git metadata, and certificate inputs
 are not part of the runtime bundle.

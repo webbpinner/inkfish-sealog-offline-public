@@ -14,6 +14,7 @@ For a working deployment, start with [Installation](INSTALLATION.md). For changi
 app.js                     Main application logic - UI state, IndexedDB, GPS, sync, modals
 index.html                 Shell document with inline styles + boot scripts
 sw.js                      Service worker - offline shell + network-first nav
+theme.css                  Shared preset CSS variables (index.html + landing.html)
 manifest.webmanifest       PWA manifest
 landing.html               Multi-ship landing page
 sealog.conf                Reference Nginx reverse proxy configuration for multi-ship deployments
@@ -26,6 +27,7 @@ src/
   sw/                      Service worker path normalization, cache keys, network-first predicate
   runtime/                 GPS/status decisions, event accordions, version state, API root
   templates/               Auto-fill rules + template transforms (categories, coordinates)
+  theme/                   Shared theme preset data + lookups (presets.js), imported by index.html and landing.html
   ui/                      DOM visibility helpers + HTML string builders
   utils/                   Identifiers, numbers, timestamps/formatters, strings, async
 
@@ -43,10 +45,10 @@ No build step. The app loads `index.html` directly; `app.js` is an ES module tha
 
 The app is a single-page app rendered entirely client-side.
 
-1. **`index.html`** loads inline CSS, declares the static UI elements used by `app.js`, and contains inline IIFE scripts:
-   - **Theme manager** - defines `PRESETS` (light/honey/ocean), reads/writes `localStorage` (`sealog.preset`) and uses each preset’s fixed palette, applies `data-preset` to `<html>`, wraps swap in `document.startViewTransition()` when available, listens to `prefers-color-scheme` changes.
+1. **`index.html`** loads `theme.css` and inline component CSS, declares the static UI elements used by `app.js`, and contains inline scripts:
+   - **Critical theme snippet** - a small synchronous (non-module) script that reads `localStorage` (`sealog.preset`) or the OS preference and sets `data-preset` on `<html>` before first paint, to avoid a theme-color flash. Kept dependency-free; runs before the deferred theme module.
+   - **Theme manager** (deferred module) - imports preset data/lookups from `src/theme/presets.js` (shared with `landing.html`), re-applies the resolved preset with `document.startViewTransition()` when available, updates the `theme-color` meta tag and picker UI, and listens for `prefers-color-scheme` changes.
    - **Accordion persistence** - `<details data-section="…">` state stored under `sealog.settings.accordion` in `localStorage`. Data and Theme start open; Auto-fill rules starts closed. Saved choices override these defaults.
-   - **Boot** - runs after DOM parse, calls `applyTheme()`, attaches system-theme listener.
 2. **`app.js`** runs after parse:
    - Opens IndexedDB and resumes interrupted sync requests via `recoverInterruptedSync()`; current records are read without migration or rewrite.
    - Restores auth state from `localStorage` and fills the signed-in account display through `updateAuthUI()`.
